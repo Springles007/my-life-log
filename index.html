@@ -36,10 +36,10 @@
 </div>
 
 <script>
-    // 1. Double-check this key! It should be VERY long.
+    // 1. Initialize Supabase with the matched URL and Key
     const _supabase = supabase.createClient(
         'https://cxbgwbouuobwwmbnbejy.supabase.co', 
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4YmdnYndvdW9id3dybmJuZWp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDI4ODksImV4cCI6MjA4NjY3ODg4OX0.qzQvG-q6O1FJ4PQGbI7_RTzycxktVYh2RQLr3zy7gEk' 
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4Ymd3Ym91dW9id3dtYm5iZWp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5Nzk3NDAsImV4cCI6MjA4NjU1NTc0MH0.P6oA_9U89B37I2X3-q3A8X5v79P0A-q8X5v79P0A_9U'
     );
 
     window.onload = displayLogs;
@@ -79,6 +79,11 @@
 
             if (error) throw error;
 
+            if (logs.length === 0) {
+                list.innerHTML = "<p>No logs found yet. Start tracking!</p>";
+                return;
+            }
+
             list.innerHTML = logs.map(entry => {
                 const date = new Date(entry.created_at).toLocaleDateString('en-GB');
                 return `
@@ -89,6 +94,7 @@
                 `;
             }).join('');
         } catch (err) {
+            console.error("Fetch error:", err);
             list.innerHTML = "<p style='color:red'>Database connection failed. check your keys!</p>";
         }
     }
