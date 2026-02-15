@@ -36,10 +36,10 @@
 </div>
 
 <script>
-    // 2. Initialize Supabase - REPLACE THE TEXT IN QUOTES BELOW
+    // 1. Double-check this key! It should be VERY long.
     const _supabase = supabase.createClient(
         'https://cxbgwbouuobwwmbnbejy.supabase.co', 
-        'sb_publishable_GYp1B63tn6Hx5BONmPLjqA_RTFGoO72'
+        'sb_publishable_GYp1B63tn6Hx5BONmPLjqA_RTFGoO72' 
     );
 
     window.onload = displayLogs;
@@ -51,44 +51,46 @@
         btn.disabled = true;
         btn.innerText = "Saving...";
 
-        // Insert into your "logs" table
-        const { error } = await _supabase
-            .from('logs')
-            .insert([{ activity: activity }]);
+        try {
+            const { error } = await _supabase
+                .from('logs')
+                .insert([{ activity: activity }]);
 
-        if (error) {
-            alert("Error: " + error.message);
-        } else {
-            displayLogs(); // Refresh list
+            if (error) throw error;
+            
+            await displayLogs(); 
+        } catch (err) {
+            console.error(err);
+            alert("Error: " + (err.message || "Check your internet or API keys"));
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Log Activity";
         }
-        
-        btn.disabled = false;
-        btn.innerText = "Log Activity";
     }
 
     async function displayLogs() {
         const list = document.getElementById('logList');
         
-        // Fetch from Supabase
-        let { data: logs, error } = await _supabase
-            .from('logs')
-            .select('*')
-            .order('created_at', { ascending: false });
+        try {
+            let { data: logs, error } = await _supabase
+                .from('logs')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-        if (error) {
-            list.innerHTML = "Connect your database to see logs.";
-            return;
+            if (error) throw error;
+
+            list.innerHTML = logs.map(entry => {
+                const date = new Date(entry.created_at).toLocaleDateString('en-GB');
+                return `
+                    <div class="log-item">
+                        <span><strong>${entry.activity}</strong></span>
+                        <span class="date">${date}</span>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            list.innerHTML = "<p style='color:red'>Database connection failed. check your keys!</p>";
         }
-
-        list.innerHTML = logs.map(entry => {
-            const date = new Date(entry.created_at).toLocaleDateString('en-GB');
-            return `
-                <div class="log-item">
-                    <span><strong>${entry.activity}</strong></span>
-                    <span class="date">${date}</span>
-                </div>
-            `;
-        }).join('');
     }
 </script>
 
